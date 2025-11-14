@@ -178,3 +178,21 @@ public class BindingManager {
         bindingCache.clear();
         plugin.getSLF4JLogger().info("Cleared binding cache. Bindings will be reloaded from storage on demand.");
     }
+
+    private String stripLegacyPrefix(String originalName) {
+        return originalName.replaceFirst("^\\.+", "");
+    }
+
+    public @NotNull Map<String, Object> getBindingCache() {
+        return bindingCache;
+    }
+
+    public long getTotalBindingsCount() {
+        try {
+            return storage.countBindings();
+        } catch (IOException e) {
+            plugin.getSLF4JLogger().error("Failed to count bindings in storage", e);
+            return -1; // Indicate error
+        }
+    }
+}
