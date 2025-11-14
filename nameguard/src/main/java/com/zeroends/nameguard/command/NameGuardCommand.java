@@ -66,6 +66,7 @@ public class NameGuardCommand implements CommandExecutor, TabCompleter {
             case "unbind" -> handleUnbind(sender, label, args);
             case "bind" -> handleBind(sender, label, args);
             case "check" -> handleCheck(sender, label, args);
+            case "status" -> handleStatus(sender);
             default -> sendHelp(sender, label);
         }
         return true;
@@ -199,6 +200,33 @@ public class NameGuardCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    private void handleStatus(CommandSender sender) {
+        sender.sendMessage(Component.text("--- NameGuard Status ---", NamedTextColor.GOLD));
+
+        long totalBindings = bindingManager.getTotalBindingsCount();
+        if (totalBindings >= 0) {
+            sender.sendMessage(Component.text("Total bindings on disk: ", NamedTextColor.GRAY).append(Component.text(totalBindings, NamedTextColor.WHITE)));
+        } else {
+            sender.sendMessage(Component.text("Could not count bindings on disk. Check console for errors.", NamedTextColor.RED));
+        }
+
+        Map<String, Object> cache = bindingManager.getBindingCache();
+        sender.sendMessage(Component.text("Cached bindings: ", NamedTextColor.GRAY).append(Component.text(cache.size(), NamedTextColor.WHITE)));
+
+        if (!cache.isEmpty()) {
+            Map<Binding.TrustLevel, Long> trustCounts = cache.values().stream()
+                    .filter(Binding.class::isInstance)
+                    .map(Binding.class::cast)
+                    .collect(Collectors.groupingBy(Binding::getTrust, Collectors.counting()));
+
+            sender.sendMessage(Component.text("Cached trust level distribution:", NamedTextColor.GRAY));
+            for (Binding.TrustLevel level : Binding.TrustLevel.values()) {
+                long count = trustCounts.getOrDefault(level, 0L);
+                sender.sendMessage(Component.text("  - " + level.name() + ": ", NamedTextColor.GRAY).append(Component.text(count, NamedTextColor.WHITE)));
+            }
+        }
+    }
+
     private void sendInfo(CommandSender sender, String key, @Nullable String value) {
         if (value != null && !value.isEmpty()) {
             sender.sendMessage(Component.text(key + ": ", NamedTextColor.GRAY).append(Component.text(value, NamedTextColor.WHITE)));
@@ -223,13 +251,17 @@ public class NameGuardCommand implements CommandExecutor, TabCompleter {
         Component checkMsg = Component.text("/" + label + " check <name>", NamedTextColor.GRAY)
                 .append(Component.text(" - Checks the binding details for a name (online or offline).", NamedTextColor.WHITE));
         sender.sendMessage(checkMsg);
+
+        Component statusMsg = Component.text("/" + label + " status", NamedTextColor.GRAY)
+                .append(Component.text(" - Shows statistics about bindings.", NamedTextColor.WHITE));
+        sender.sendMessage(statusMsg);
     }
 
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("reload", "unbind", "bind", "check").stream()
+            return Arrays.asList("reload", "unbind", "bind", "check", "status").stream()
                     .filter(s -> s.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }

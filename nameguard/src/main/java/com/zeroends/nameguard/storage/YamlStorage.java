@@ -129,6 +129,16 @@ public class YamlStorage implements IStorage {
     }
 
     @Override
+    public long countBindings() throws IOException {
+        if (!Files.isDirectory(dataDirectory)) {
+            return 0;
+        }
+        try (var stream = Files.list(dataDirectory)) {
+            return stream.filter(path -> path.toString().endsWith(".yml")).count();
+        }
+    }
+
+    @Override
     public void shutdown() {
         // No persistent file handles, so nothing to shut down.
     }
