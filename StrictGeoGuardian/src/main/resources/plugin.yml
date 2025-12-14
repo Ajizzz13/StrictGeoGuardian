@@ -1,0 +1,22 @@
+name: StrictGeoGuardian
+version: '${version}'
+main: com.zeroends.strictgeoguardian.StrictGeoGuardian
+api-version: '1.21'
+author: zeroends
+description: Prevents identity theft with strict geo-fencing and multi-layer fingerprinting.
+commands:
+  identity:
+    description: Main command for StrictGeoGuardian.
+    usage: /identity <view|override|whitelist|audit|stats> [player]
+    permission: strictgeoguardian.admin
+  pass:
+    description: Register or login your password for verification.
+    usage: /pass <password>
+    permission: strictgeoguardian.player
+permissions:
+  strictgeoguardian.admin:
+    description: Allows access to all /identity commands.
+    default: op
+  strictgeoguardian.player:
+    description: Allows usage of the /pass command.
+    default: true

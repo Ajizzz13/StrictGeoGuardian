@@ -1,0 +1,60 @@
+# ----------------------------------------------- #
+#    StrictGeoGuardian Configuration v1.0.0       #
+# ----------------------------------------------- #
+
+security:
+  api:
+    # API 1 (Primary / Source of Truth). Used for registration and final re-checks.
+    # Default: findip.net (requires a token)
+    primary-url: "https://api.findip.net/%s/"
+    # Get your token from https://findip.net/
+    primary-token: "2b26073772e4472db5ddeb906534ac7e"
+    
+    # API 2 (Secondary Check). Used if the fallback check fails.
+    # Default: ip-api.com (free tier)
+    secondary-url: "http://ip-api.com/json/%s"
+
+    # API 3 (Fallback / Initial Check). Used for fast, initial checking.
+    # Default: ipwho.is (free tier)
+    fallback-url: "https://ipwho.is/%s"
+
+  # Secret key used for hashing sensitive data (like subnet or ASN).
+  # !! DO NOT SHARE THIS KEY !!
+  # If this is empty, a new one will be generated on startup.
+  # Keep this key backed up. Changing it will invalidate all existing fingerprints.
+  hmac-key: ""
+
+rules:
+  # Strict Geographical Check Configuration
+  strict-geo:
+    # Maximum allowed distance (in kilometers) between the stored location
+    # and the new location to pass the geographical check.
+    # 10.0 = 10 kilometers.
+    tolerance-km: 10.0
+
+  # Fingerprint Similarity Score Thresholds (out of 100.0)
+  scores:
+    # Score >= 80.0
+    # Player is allowed in instantly. No logs created for this.
+    auto-allow: 80.0
+    
+    # Score >= 60.0 AND < 80.0
+    # Player is allowed in, but a log is created for monitoring.
+    allow-monitor: 60.0
+    
+    # Score >= 40.0 AND < 60.0
+    # Player is BLOCKED, but flagged for manual admin review.
+    # (e.g., player got a new PC and new internet, but location is same)
+    manual-review: 40.0
+    
+    # Score < 40.0
+    # Player is auto-blocked as a high-confidence impersonator.
+    auto-block: 39.9
+
+  # Player Whitelist
+  # Players on this list will bypass ALL checks (Geo and Fingerprint).
+  # Useful for admins or players who travel frequently.
+  # Usernames are case-insensitive.
+  whitelist:
+  - "AdminPlayer1"
+  - "zeroends"
